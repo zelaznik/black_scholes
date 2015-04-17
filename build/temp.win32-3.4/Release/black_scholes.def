@@ -1,0 +1,3 @@
+LIBRARY black_scholes.pyd
+EXPORTS
+PyInit_black_scholes
