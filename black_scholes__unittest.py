@@ -737,8 +737,10 @@ from black_scholes import Option
 from abc import ABCMeta, abstractmethod
 ABC = ABCMeta('ABC', (), {})
 
+dR = .0001
 dS = .00001
 dV = .0001
+dt = .0001
 
 data = [r.split() for r in raw_data.splitlines()]
 headers = data.pop(0)
@@ -787,7 +789,26 @@ class test_Option(ABC, unittest.TestCase):
             vManual = (vUp - vDown) / (2 * S * dS)
             vAuto = Option(self.flag, S, K, v, d, r, t).gamma
             self.assertAlmostEqual(vManual, vAuto, 4)
-            
+
+    def test_rho(self):
+        for i, r in self.df.iterrows():
+            S, K, v, d, r, t, pCall, pPut = r
+            vDown = Option(self.flag, S, K, v, d, r - dR, t).price
+            vUp = Option(self.flag, S, K, v, d, r + dR, t).price
+            vManual = (vUp - vDown) / (2 * dR)
+            vAuto = Option(self.flag, S, K, v, d, r, t).rho
+            self.assertAlmostEqual(vManual, vAuto, 3)
+
+    def test_theta(self):
+        for i, r in self.df.iterrows():
+            S, K, v, d, r, t, pCall, pPut = r
+            opt = Option(self.flag, S, K, v, d, r, t)
+            vAuto = opt.theta
+            vUp = Option(self.flag, S, K, v, d, r, t - dt).price
+            vManual = (vUp - opt.price) / (dt)
+            self.assertAlmostEqual(vManual, vAuto, 2)
+
+
 class test_Call(test_Option):
     flag = True
     

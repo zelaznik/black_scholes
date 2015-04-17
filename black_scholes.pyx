@@ -151,3 +151,21 @@ cdef class Option:
     property vega:
         def __get__(self):
             return self.S * self.eqt() * pdf(self.d(1)) * sqrt(self.t)
+            
+    property rho:
+        def __get__(self):
+            cdef int y = 2 * self.call_flag - 1
+            return y * self.K * self.t * self.ert() * CDF(y * self.d(2))
+            
+    property theta:
+        def __get__(self):
+            cdef int y = 2 * self.call_flag - 1
+            cdef double d1, d2
+            cdef double part_a, part_b, part_c
+
+            d1 = self.d(1)
+            d2 = self.d(2)
+            part_a = - self.eqt() * self.S * pdf(d1) * self.vol / (2 * sqrt(self.t))
+            part_b = - y * self.r * self.K * self.ert() * CDF(y * d2)
+            part_c = y * self.q * self.S * self.eqt() * CDF(y * d1)
+            return part_a + part_b + part_c
