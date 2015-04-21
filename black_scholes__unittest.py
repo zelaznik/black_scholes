@@ -746,7 +746,7 @@ data = [r.split() for r in raw_data.splitlines()]
 headers = data.pop(0)
 df = pd.DataFrame(data, columns = headers, dtype = float)
 
-class test_Option(ABC, unittest.TestCase):
+class test_Option(ABC):
 
     @abstractmethod
     def flag(self):
@@ -758,65 +758,61 @@ class test_Option(ABC, unittest.TestCase):
     def test_price(self):
         for i, r in self.df.iterrows():
             S, K, v, d, r, t, pCall, pPut = r
-            vManual = Option(self.flag, S, K, v, d, r, t).price
+            vManual = Option(self.flag, S, K, v, d, r, t).price()
             vAuto = pCall if self.flag else pPut
             self.assertAlmostEqual(vManual, vAuto, 7)
     
     def test_delta(self):
         for i, r in self.df.iterrows():
             S, K, v, d, r, t, pCall, pPut = r
-            vDown = Option(self.flag, S*(1-dS), K, v, d, r, t).price
-            vUp = Option(self.flag, S*(1+dS), K, v, d, r, t).price
+            vDown = Option(self.flag, S*(1-dS), K, v, d, r, t).price()
+            vUp = Option(self.flag, S*(1+dS), K, v, d, r, t).price()
             vManual = (vUp - vDown) / (2 * S * dS)
-            vAuto = Option(self.flag, S, K, v, d, r, t).delta
+            vAuto = Option(self.flag, S, K, v, d, r, t).delta()
             self.assertAlmostEqual(vManual, vAuto, 4)
 
     def test_vega(self):
         for i, r in self.df.iterrows():
             S, K, v, d, r, t, pCall, pPut = r            
-            vDown = Option(self.flag, S, K, v-dV, d, r, t).price
-            vUp = Option(self.flag, S, K, v+dV, d, r, t).price
+            vDown = Option(self.flag, S, K, v-dV, d, r, t).price()
+            vUp = Option(self.flag, S, K, v+dV, d, r, t).price()
             vManual = (vUp - vDown) / (2 * dV)
             opt = Option(self.flag, S, K, v, d, r, t)
-            vAuto = opt.vega
+            vAuto = opt.vega()
             self.assertAlmostEqual(vManual, vAuto, 3)
 
     def test_gamma(self):
         for i, r in self.df.iterrows():
-            S, K, v, d, r, t, pCall, pPut = r            
-            vDown = Option(self.flag, S*(1-dS), K, v, d, r, t).delta
-            vUp = Option(self.flag, S*(1+dS), K, v, d, r, t).delta
+            S, K, v, d, r, t, pCall, pPut = r
+            vDown = Option(self.flag, S*(1-dS), K, v, d, r, t).delta()
+            vUp = Option(self.flag, S*(1+dS), K, v, d, r, t).delta()
             vManual = (vUp - vDown) / (2 * S * dS)
-            vAuto = Option(self.flag, S, K, v, d, r, t).gamma
+            vAuto = Option(self.flag, S, K, v, d, r, t).gamma()
             self.assertAlmostEqual(vManual, vAuto, 4)
 
     def test_rho(self):
         for i, r in self.df.iterrows():
             S, K, v, d, r, t, pCall, pPut = r
-            vDown = Option(self.flag, S, K, v, d, r - dR, t).price
-            vUp = Option(self.flag, S, K, v, d, r + dR, t).price
+            vDown = Option(self.flag, S, K, v, d, r - dR, t).price()
+            vUp = Option(self.flag, S, K, v, d, r + dR, t).price()
             vManual = (vUp - vDown) / (2 * dR)
-            vAuto = Option(self.flag, S, K, v, d, r, t).rho
+            vAuto = Option(self.flag, S, K, v, d, r, t).rho()
             self.assertAlmostEqual(vManual, vAuto, 3)
 
     def test_theta(self):
         for i, r in self.df.iterrows():
             S, K, v, d, r, t, pCall, pPut = r
             opt = Option(self.flag, S, K, v, d, r, t)
-            vAuto = opt.theta
-            vUp = Option(self.flag, S, K, v, d, r, t - dt).price
-            vManual = (vUp - opt.price) / (dt)
+            vAuto = opt.theta()
+            vUp = Option(self.flag, S, K, v, d, r, t - dt).price()
+            vManual = (vUp - opt.price()) / (dt)
             self.assertAlmostEqual(vManual, vAuto, 2)
 
-
-class test_Call(test_Option):
+class test_Call(test_Option, unittest.TestCase):
     flag = True
     
-class test_Put(test_Option):
+class test_Put(test_Option, unittest.TestCase):
     flag = False
-    
-del test_Option
 
 if __name__ == '__main__':
     unittest.main()
-
