@@ -12,41 +12,17 @@ cdef extern from "math.h":
 
 cdef double pdf(double z):
     return inv_sqrt_2pi * exp(-0.5*z*z)
+    
+cdef extern from "stats.h":
+    double CDF(double z)
 
-cdef double CDF(double z):
-    ''' Sums the integral of the talor series for e ^ (-0.5 * z**2) '''
-    cdef double total, item, z2, z4, a, b
-    cdef int m, k
-
-    if z < -6:
-        return 0
-    if z > 6:
-        return 1
-
-    total = 0.0
-    z2 = z*z
-    z4 = z2*z2
-    b = z
-    for k in range(0, 100, 2):
-        item = 1
-        for m in range(1, k+1):
-            item *= (2*m)
-        a = 2*k + 1
-        item = b / (a*item)
-        item *= (1 - (a*z2)/((a+1)*(a+2)))
-        if k > 50 and item == 0:
-            break
-        total += item
-        b *= z4
-
-    return 0.5 + inv_sqrt_2pi * total
-
-def std_normal(double z):
+def std_normal(z):
     return CDF(z)
 
 cdef class Option:
     ''' Option(call_flag, S, K, vol, q, r, t)'''
     cdef double S, K, vol, q, r, t
+    cdef double d1, d2
     cdef int call_flag, y
 
     def __cinit__(object self, int call_flag, double S, \
