@@ -2,10 +2,10 @@ double const inv_sq_2pi = 0.3989422804014327;
 
 double CDF(double z) {
     /* Takes the integral of the taylor series for
-       e ** (-1/2 * z**2) and sums the first 200
+       e ** (-1/2 * z**2) and sums the first 100
        terms of the series.
     f(n, z) = (((-1)**n) * z ** (2n+1)) / ((2n+1)(*2**n)(n!))
-    CDF(z) = f(0,z) + f(1,z) + ... + f(199, z)*/
+    CDF(z) = f(0,z) + f(1,z) + ... + f(99, z)*/
     int k;
     double m, total, item, z2, z4, a, b;
     
