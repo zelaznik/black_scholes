@@ -1,6 +1,11 @@
 double const inv_sq_2pi = 0.3989422804014327;
 
 double CDF(double z) {
+    /* Takes the integral of the taylor series for
+       e ** (-1/2 * z**2) and sums the first 200
+       terms of the series.
+    f(n, z) = (((-1)**n) * z ** (2n+1)) / ((2n+1)(*2**n)(n!))
+    CDF(z) = f(0,z) + f(1,z) + ... + f(199, z)*/
     int k;
     double m, total, item, z2, z4, a, b;
     
@@ -11,11 +16,16 @@ double CDF(double z) {
         return 1;
     }
 
-    m = 1;
-    b = z;
-    z2 = z * z;
-    z4 = z2 * z2;
+    m = 1;         // m(k) == (2**k)/factorial(k)
+    b = z;         // b(k) == z ** (2*k + 1)
+    z2 = z * z;    // cache of z squared
+    z4 = z2 * z2;  // cache of z to the 4th
     total = 0;
+
+    /* The series is conditionally convergent
+    we group the terms into pairs, one positive,
+    one negative, so that we avoid excessive rounding
+    errors and overflow errors.*/
     for (k=0; k<100; k+=2) {
         a = 2*k + 1;
         item = b / (a*m);
@@ -26,36 +36,4 @@ double CDF(double z) {
     }
     
     return 0.5 + inv_sq_2pi * total;
-}
-
-double fabs(double z) {
-    if (z < 0) {
-        return -z;
-    }
-    return z;
-}
-
-double nerf(double xi)
-{
-    double      ret;
-    double      x;
-    int         i;
-    double a[7] = {.0002765672,.0001520143,.0092705272,.0422820123,.0705230784,1.,.0000430638};
-
-    x=fabs(xi);
-    if( x > 10. ) {
-        ret = (xi < 0) ? -1. : 1.;
-    }
-    else {
-        ret = a[6];
-        for (i = 0; i < 6; i++) {
-            ret = a[i] + x * ret;
-        }
-        for (i = 0; i < 4; i++) {
-            ret = ret * ret;
-        }
-        ret = 1.-1./ret;
-        ret = (xi < 0.) ? -ret : ret;
-    }
-    return ret;
 }

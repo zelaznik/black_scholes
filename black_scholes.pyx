@@ -12,7 +12,7 @@ cdef extern from "math.h":
 
 cdef double pdf(double z):
     return inv_sqrt_2pi * exp(-0.5*z*z)
-    
+
 cdef extern from "stats.h":
     double CDF(double z)
 
